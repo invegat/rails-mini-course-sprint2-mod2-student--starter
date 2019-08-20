@@ -4,8 +4,9 @@ class Order < ApplicationRecord
     product_ids = OrderProduct.where(order_id: id).pluck(:product_id)
     Product.find(product_ids)    
   end
+
   def shippable?
-    status != "shipped" && OrderProduct.where(order_id: id).count > 0 
+    status != "shipped" && products.select {|p| not p.available?}.count == 0 
   end
   def ship
     if shippable?
