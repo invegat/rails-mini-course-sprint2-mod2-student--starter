@@ -1,6 +1,9 @@
 module Api
   module V1
     class OrdersController < ApplicationController
+      # class OrdersError < StandareError
+      # end
+
       def index
         if params[:customer_id].present?
           @orders = Order.where(customer_id: params[:customer_id])
@@ -29,16 +32,12 @@ module Api
 
       def ship
         @order = Order.find(params[:id])
-        #  `shippable` will be `true` if the order is not marked as shipped *and* there is at least 1 product in the order. Otherwise, `shippable` should be `false`.
-        shippable = @order.status != "shipped" && OrderProduct.where(order_id: params[:id]).count > 0 
-        if shippable
-          if @order.update(status: "shipped")
-            render json: @order, status: :ok, location: api_v1_order_url(@order)
-          else
-            render json: @order.errors, status: :unprocessable_entity,  message: "There was a problem shipping your order." 
-          end
+        if @order.ship
+          puts "orders_controller ship ok"
+          render json: @order, status: :ok, location: api_v1_order_url(@order)
         else
-          render json: {message: "There was a problem shipping your order."}
+          puts "orders_controller ship error"
+          render json: {message: "There was a problem shipping your order."}, status: :unprocessable_entity,  message: "There was a problem shipping your order." 
         end
       end
     end
