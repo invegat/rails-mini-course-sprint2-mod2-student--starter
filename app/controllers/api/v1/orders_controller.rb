@@ -1,9 +1,6 @@
 module Api
   module V1
     class OrdersController < ApplicationController
-      # class OrdersError < StandareError
-      # end
-
       def index
         if params[:customer_id].present?
           @orders = Order.where(customer_id: params[:customer_id])
@@ -32,7 +29,8 @@ module Api
 
       def ship
         @order = Order.find(params[:id])
-        if @order.ship
+        op = OrderProcessor.new(@order)
+        if op.ship
           puts "orders_controller ship ok"
           render json: @order, status: :ok, location: api_v1_order_url(@order)
         else
